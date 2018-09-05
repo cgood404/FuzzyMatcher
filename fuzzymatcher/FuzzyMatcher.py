@@ -1,35 +1,21 @@
 class FuzzyMatcher:
-    def __init__(self, accuracy):
-        self.accuracy = accuracy
+    def levendist2(self, s: str, t: str) -> int:
+        m = len(s)
+        n = len(t)
+        dist_matrix = [[0 for i in range(n+1)] for j in range(m+1)]
 
-    # returns the Levenshtein Distance between two strings
-    def levendist(self, s: str, t: str) -> int:
-        if s == '':
-            return len(t)
-        if t == '':
-            return len(s)
+        for i in range(1, m+1):
+            dist_matrix[i][0] = i
 
-        if s[-1] == t[-1]:
-            cost = 0
-        else:
-            cost = 1
+        for i in range(1, n+1):
+            dist_matrix[0][i] = i
 
-        i, j, k = (s[:-1], t), (s, t[:-1]), (s[:-1], t[:-1])
-        if i not in self.memory:
-            self.memory[i] = self.levendist(*i)
-        if j not in self.memory:
-            self.memory[j] = self.levendist(*j)
-        if k not in self.memory:
-            self.memory[k] = self.levendist(*k)
-
-        minimum = min(self.memory[i] + 1,
-                      self.memory[j] + 1,
-                      self.memory[k] + cost)
-        return minimum
-
-    def match(self, s: str, t: str) -> float:
-        self.memory = {}
-        maxlen = max(len(s), len(t))
-        if maxlen == 0:
-            return 1.0
-        return ((maxlen - self.levendist(s.lower(), t.lower())) / maxlen) > self.accuracy
+        for i in range(1, m+1):
+            for j in range(1, n+1):
+                cost = 1
+                if s[i] == t[j]:
+                    cost = 0
+                dist_matrix[i][j] = min(dist_matrix[i-1][j] + 1,
+                                        dist_matrix[i][j-1] + 1,
+                                        dist_matrix[i-1][j-1] + cost)
+        return dist_matrix[m][n]
